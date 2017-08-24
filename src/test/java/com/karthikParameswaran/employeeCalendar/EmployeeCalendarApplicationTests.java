@@ -3,20 +3,22 @@ package com.karthikParameswaran.employeeCalendar;
 import com.karthikParameswaran.employeeCalendar.Data.EmployeeData;
 import com.karthikParameswaran.employeeCalendar.Entity.Employee;
 import com.karthikParameswaran.employeeCalendar.Entity.TimeOffRequest;
-import com.sun.deploy.net.HttpResponse;
-import edu.emory.mathcs.backport.java.util.Arrays;
+
 import jdk.nashorn.internal.ir.debug.JSONWriter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+
 public class EmployeeCalendarApplicationTests {
 
 
@@ -38,25 +41,25 @@ public class EmployeeCalendarApplicationTests {
 
     @Autowired
     private EmployeeData testData;
-
+    private List<Employee> el= new ArrayList<Employee>();
     @Before
     public void generateTestData()
     {
         List<TimeOffRequest> requests= new ArrayList<TimeOffRequest>();
-        Employee e1 = new Employee("E01", "KP",0,100,requests);
-        Employee e2 = new Employee("E02", "PK",0,100,requests);
-        Employee e3 = new Employee("E03", "KPK",0,100,requests);
-        List<Employee> el= new ArrayList<Employee>();
+        Employee e1 = new Employee("T01", "KP",0,100,requests);
+        Employee e2 = new Employee("T02", "PK",0,100,requests);
+        Employee e3 = new Employee("T03", "KPK",0,100,requests);
+
         el.add(e1);
         el.add(e2);
         el.add(e3);
         testData.insert(el);
-        this.restTemplate.postForObject("/Employee/timeoff/request/E01/5",null, HttpStatus.class);
+        this.restTemplate.postForObject("/Employee/timeoff/request/T01/5",null, HttpStatus.class);
     }
     @Test
 	public void contextLoads() {
 
-        Employee found = testData.findById("E01");
+        Employee found = testData.findById("T01");
         assertThat(found.getName()).isEqualTo("KP");
 	}
 
@@ -72,20 +75,20 @@ public class EmployeeCalendarApplicationTests {
         String actualResponse;
         String expectedResponse= "[" +
                 "{" +
-                "\"id\":\"E01\"," +
+                "\"id\":\"T01\"," +
                 "\"name\":\"KP\"," +
                 "\"holidays_used\":5," +
                 "\"holidays_available\":95," +
                 "\"allRequests\":[{\"hoursRequested\":5}]" +
                 "}," +
                 "{" +
-                "\"id\":\"E02\"," +
+                "\"id\":\"T02\"," +
                 "\"name\":\"PK\"," +
                 "\"holidays_used\":0," +
                 "\"holidays_available\":100," +
                 "\"allRequests\":[]" +
                 "}," +"{" +
-                "\"id\":\"E03\"," +
+                "\"id\":\"T03\"," +
                 "\"name\":\"KPK\"," +
                 "\"holidays_used\":0," +
                 "\"holidays_available\":100," +
@@ -97,7 +100,7 @@ public class EmployeeCalendarApplicationTests {
     }
     @Test
     public void deleteEmployeeTest() {
-        String sendpoint = "/Employee/E03";
+        String sendpoint = "/Employee/T03";
         URI endpoint = URI.create(sendpoint);
         String actualResponse=null;
         String expectedResponse= null;
@@ -109,22 +112,23 @@ public class EmployeeCalendarApplicationTests {
     public void postEmployeeTest() {
 
         List<TimeOffRequest> requests= new ArrayList<TimeOffRequest>();
-        Employee b = new Employee("E04", "PK",0,100,requests);
+        Employee b = new Employee("T04", "PK",0,100,requests);
         //void method must return null
         String endpoint = "/Employee";
         String actualResponse;
         String expectedResponse= null;
         actualResponse=this.restTemplate.postForObject("/Employee",b, String.class);
-        Employee a =testData.findById("E04");
+        Employee a =testData.findById("T04");
 
         assertThat(a.getName() ).isEqualTo(b.getName());
+        testData.delete("T04");
     }
     @Test
     public void getEmployeeByIdTest() {
-        String endpoint = "/Employee/E02";
+        String endpoint = "/Employee/T02";
         String actualResponse;
         String expectedResponse= "{" +
-                "\"id\":\"E02\"," +
+                "\"id\":\"T02\"," +
                 "\"name\":\"PK\"," +
                 "\"holidays_used\":0," +
                 "\"holidays_available\":100," +
@@ -140,7 +144,7 @@ public class EmployeeCalendarApplicationTests {
      ******************************/
     @Test
     public void queryTimeoffTest() {
-        String endpoint = "/Employee/timeoff/query/E02";
+        String endpoint = "/Employee/timeoff/query/T02";
         String actualResponse;
         String expectedResponse="100";
 
@@ -150,7 +154,7 @@ public class EmployeeCalendarApplicationTests {
 
     @Test
     public void postTimeOffRequestPositiveTest() {
-        String endpoint = "/Employee/timeoff/request/E01/5";
+        String endpoint = "/Employee/timeoff/request/T01/5";
         HttpStatus actualResponse;
         HttpStatus expectedResponse=HttpStatus.OK;
 
@@ -160,7 +164,7 @@ public class EmployeeCalendarApplicationTests {
 
     @Test
     public void postTimeOffRequestNegativeTest() {
-        String endpoint = "/Employee/timeoff/request/E01/105";
+        String endpoint = "/Employee/timeoff/request/T01/105";
         HttpStatus actualResponse;
         HttpStatus expectedResponse=HttpStatus.BAD_REQUEST;
 
@@ -170,7 +174,7 @@ public class EmployeeCalendarApplicationTests {
     }
     @Test
     public void getListTimeOff() {
-        String endpoint = "/Employee/timeoff/list/E01";
+        String endpoint = "/Employee/timeoff/list/T01";
         String actualResponse;
         String expectedResponse="[{" +
                 "\"hoursRequested\":5" +
@@ -182,6 +186,6 @@ public class EmployeeCalendarApplicationTests {
     }
     @After
     public void destroyData(){
-        testData.deleteAll();
+        testData.delete(el);
     }
 }
