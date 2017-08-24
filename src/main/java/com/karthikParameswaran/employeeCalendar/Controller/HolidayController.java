@@ -26,7 +26,7 @@ import java.util.List;
 @RequestMapping("/Employee")
 public class HolidayController {
     @Autowired
-    EmployeeData emp;
+    private EmployeeData emp;
 
    @RequestMapping(method = RequestMethod.GET)
     public List<Employee> getAllEmployees(){
@@ -61,10 +61,13 @@ public class HolidayController {
     public HttpStatus timeOffRequest(@PathVariable("id") String id, @PathVariable("hrs") int hrs){
         System.out.println(hrs + id);
         int hoursLeftAfterRequest;
+
         TimeOffRequest t= new TimeOffRequest();
         t.setHoursRequested(hrs);
+
         Employee e= emp.findById(id);
         hoursLeftAfterRequest= e.getHolidays_available() - hrs;
+
         if(hoursLeftAfterRequest>=0){
             e.setHolidays_available(hoursLeftAfterRequest);
             e.setHolidays_used(e.getHolidays_used()+hrs);
@@ -78,7 +81,7 @@ public class HolidayController {
         //return HttpStatus.OK;
     }
     @RequestMapping(value="/timeoff/list/{id}",method = RequestMethod.GET)
-    public int timeOffList(@PathVariable String id){
-        return emp.findById(id).getHolidays_available();
+    public List<TimeOffRequest> timeOffList(@PathVariable String id){
+        return emp.findById(id).getAllRequests();
     }
 }

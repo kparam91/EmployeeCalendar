@@ -8,8 +8,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Document(collection = "Employees")
 public class Employee {
@@ -18,21 +17,26 @@ public class Employee {
 
     private String name;
     private int holidays_used;
+
     @Field
     private int holidays_available=100;
-    private List<TimeOffRequest> requests;
 
-    @PersistenceConstructor
-    public Employee(String id, String name, int holidays_used, List<TimeOffRequest> requests) {
+    private List<TimeOffRequest> allRequests = new ArrayList<TimeOffRequest>();
+
+
+    public Employee(String id, String name, int holidays_used, int holidays_available, List<TimeOffRequest> allRequests) {
         this.id = id;
         this.name = name;
         this.holidays_used = holidays_used;
-        this.requests = requests;
+        this.holidays_available = holidays_available;
+        this.allRequests = allRequests;
     }
-
-
-
-    public Employee() {
+    public List<TimeOffRequest> getAllRequests() {
+        return allRequests;
+    }
+    public Employee(){}
+    public void setAllRequests(List<TimeOffRequest> allRequests) {
+        this.allRequests = allRequests;
     }
 
     public String getId() {
@@ -66,18 +70,6 @@ public class Employee {
     public void setHolidays_available(int holidays_available) {
         this.holidays_available = holidays_available;
     }
-    public List<TimeOffRequest> getRequests() {
-        return requests;
-    }
-
-    public void setRequests(List<TimeOffRequest> requests) {
-        this.requests=requests;
-    }
-    public void addRequestToList(TimeOffRequest request)
-    {
-        this.requests.add(request);
-
-    }
 
     @Override
     public String toString() {
@@ -86,8 +78,14 @@ public class Employee {
                 ", name='" + name + '\'' +
                 ", holidays_used=" + holidays_used +
                 ", holidays_available=" + holidays_available +
-                ", requests=" + requests +
+               // ", requests=" + requests +
+                ", allRequests=" + allRequests +
                 '}';
     }
+
+    public void addRequestToList(TimeOffRequest request){
+        this.allRequests.add(request);
+    }
+
 }
 
